@@ -5,6 +5,7 @@ from twilio.http.response import Response
 from twilio.rest import Client
 import xml.etree.ElementTree as etree
 from ApixuClient import ApixuClient
+import json
 
 class ProxiedTwilioHttpClient(HttpClient):
     """
@@ -56,8 +57,8 @@ def readCredentials(fileName):
 def readWeatherInfo(myKey):
     try:
         weatherClient = ApixuClient(myKey)
-        weather = weatherClient.getCurrentWeather(q="L6A3Y1&temp_c")
-        print(weather)
+        weather = json.loads ( str(weatherClient.getCurrentWeather(q="L6A3Y1&temp_c&feelslike_c&precip_mm")).replace("\"", "'") )
+        print(weather["current"]["temp_c"])
     except Exception as e:
         print("Failed to get weather forecast: " + e)
 
