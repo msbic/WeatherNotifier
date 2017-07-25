@@ -4,6 +4,7 @@ from twilio.http import HttpClient, get_cert_file
 from twilio.http.response import Response
 from twilio.rest import Client
 import xml.etree.ElementTree as etree
+from ApixuClient import ApixuClient
 
 class ProxiedTwilioHttpClient(HttpClient):
     """
@@ -34,6 +35,7 @@ def readCredentials(fileName):
         twillioSID = ""
         twillioToken = ""
         fromNumber = ""
+        apixuKey = ""
         tree = etree.parse(fileName)
         root = tree.getroot()
         for n in root:
@@ -43,17 +45,26 @@ def readCredentials(fileName):
                 twillioToken = n.attrib["value"]
             elif n.tag == "fromNumber":
                 fromNumber = n.attrib["value"]
-                return (twillioSID, twillioToken, fromNumber)
+            elif n.tag == "apixuKey":
+                apixuKey = n.attrib["value"]
+                return (twillioSID, twillioToken, fromNumber, apixuKey)
     except xml.etree.ElementTree.ParseError as e:
         #var/log/
         print("Failed to parse sms credentials file " + e)
         return ()
 
-def readWeatherInfo:
-    
+def readWeatherInfo(myKey):
+    try:
+        weatherClient = ApixuClient(myKey)
+        weather = weatherClient.getCurrentWeather(q="L6A3Y1&temp_c")
+        print(weather)
+    except Exception as e:
+        print("Failed to get weather forecast: " + e)
+
 
 if __name__ == "__main__":
     params = readCredentials("config.xml")
-    if len(params) >= 3:        
-    	client = Client(params[0], params[1])
-    	client.messages.create(to="+16474053246", from_=params[2], body="Spam Span Spam!")
+    if len(params) >= 4: 
+        readWeatherInfo(params[3])       
+    	#client = Client(params[0], params[1])
+    	#client.messages.create(to="+16474053246", from_=params[2], body="Spam Span Spam!")
